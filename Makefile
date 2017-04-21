@@ -1,6 +1,7 @@
-all: 2_1_cmp.exe 
+all: 2_1_cmp.exe 2_3_sort.exe
 
 2_1_cmp.exe: 2_1_cmp.o
+2_3_sort.exe: 2_3_sort.o
 
 %.exe: %.o
 	bwlink format dos name $@ file $^
