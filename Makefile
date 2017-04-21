@@ -10,5 +10,8 @@ all: 2_1_cmp.exe 2_3_sort.exe
 	bwasm -0 -zcm=masm -fo$@ $^
 	
 clean:
-	rm *.exe *.o *.err
+	rm *.o *.err
+	rm 2_1_cmp.exe
+	rm 2_3_sort.exe
+
 

@@ -7,6 +7,7 @@ data	segment	para
 symb	db	'='
 tb_len	dw	0
 tb_ind	dw	128 dup(?)
+new_lin	db	0ah,0dh,'$'
 all_str	db	16384 dup(?)
 data	ends
 
@@ -40,20 +41,30 @@ l1:	mov	ah,1
 next1:	mov	cx,tb_len
 	lea	bx,all_str	;bx store the str index
 	lea	di,tb_ind;di	store the index table index 
-l2:	mov	[di],bx	
+l2:	push	cx
+	mov	[di],bx	
 	push	di
+	push	bx
 	mov	di,bx
 	call	scf_str
+	pop	bx
+	push	bx
 	mov	si,bx	
 	call	lo_up
+	pop	bx
+	push	bx
 	mov	si,bx
 	call	len_str
+	pop	bx
 	add	bx,ax
 	inc	bx
 	pop	di
-	inc	di
+	add	di,2
+	pop	cx
 	loop	l2
 	
+	call	sort	
+
 	call	prt_tab
 
 exit:	mov	ax,4c00h
@@ -174,11 +185,8 @@ end_cs:	pop	di
 cmp_str	endp
 
 prt_nl proc
-	mov	dl,0dh
-	mov	ah,2
-	int	21h
-	mov	dl,01h
-	mov	ah,2
+	lea	dx,new_lin
+	mov	ah,9
 	int	21h
 	ret
 prt_nl 	endp
@@ -187,14 +195,49 @@ prt_tab proc
 	mov	cx,tb_len
 	lea	si,tb_ind
 pt_l1:	push	si
+	push	cx
 	mov	si,[si]
 	call	prt_str
 	call	prt_nl
+	pop	cx
 	pop	si
-	inc	si
+	add	si,2
 	loop pt_l1
-	
+	ret	
 prt_tab endp
+
+sort	proc
+s_lp2:	mov	bx,0
+	mov	cx,tb_len
+	sub	cx,1
+	lea	si,tb_ind
+s_lp1:	mov	di,si
+	add	di,2
+	push	di
+	push	si
+	push	bx
+	push	cx
+	mov	si,[si]
+	mov	di,[di]
+	call	cmp_str
+	pop	cx
+	pop	bx
+	pop	si
+	pop	di
+	cmp	symb,'>'
+	jne	s_ctn
+	mov	ax,[si]
+	xchg	[di],ax
+	mov	[si],ax
+	mov	bx,1
+s_ctn:	add	si,2
+	loop	s_lp1
+	cmp	bx,0
+	je	end_s
+	jmp	s_lp2
+end_s:	ret
+sort	endp
 	
+
 code	ends
 	end	main
