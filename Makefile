@@ -1,7 +1,9 @@
-all: 2_1_cmp.exe 2_3_sort.exe
+all: 2_1_cmp.exe 2_2_set.exe 2_3_sort.exe
 
 2_1_cmp.exe: 2_1_cmp.o
+2_2_set.exe: 2_2_set.o
 2_3_sort.exe: 2_3_sort.o
+
 
 %.exe: %.o
 	bwlink format dos name $@ file $^
@@ -12,6 +14,7 @@ all: 2_1_cmp.exe 2_3_sort.exe
 clean:
 	rm *.o *.err
 	rm 2_1_cmp.exe
+	rm 2_2_set.exe
 	rm 2_3_sort.exe
 
 
