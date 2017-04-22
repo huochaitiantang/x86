@@ -8,7 +8,8 @@ symb	db	'='
 tb_len	dw	0
 tb_ind	dw	128 dup(?)
 new_lin	db	0ah,0dh,'$'
-all_str	db	16384 dup(?)
+all_str	db	'14061198',0
+	db	16384 dup(?)
 data	ends
 
 code	segment	para
@@ -38,9 +39,18 @@ l1:	mov	ah,1
 	mov	tb_len,ax
 	jmp	l1
 
-next1:	mov	cx,tb_len
+next1:	mov	ax,tb_len
+	add	ax,1
+	mov	tb_len,ax
+	
+	call	prt_nl
+	mov	cx,tb_len
+	sub	cx,1
 	lea	bx,all_str	;bx store the str index
-	lea	di,tb_ind;di	store the index table index 
+	lea	di,tb_ind;di	store the index table index
+	mov	[di],bx
+	add	di,2
+	add	bx,9
 l2:	push	cx
 	mov	[di],bx	
 	push	di
@@ -50,7 +60,7 @@ l2:	push	cx
 	pop	bx
 	push	bx
 	mov	si,bx	
-	call	lo_up
+	;call	lo_up
 	pop	bx
 	push	bx
 	mov	si,bx
@@ -101,10 +111,11 @@ ss_lp1:	int	21h
 	mov	[di],al
 	inc	di
 	jmp	ss_lp1
-end_ss:	mov	[di],0
+end_ss:	mov	byte ptr [di],0
 	pop	di
 	pop	dx
 	pop	ax
+	call	prt_nl
 	ret
 scf_str endp
 
@@ -166,7 +177,17 @@ cs_jp1:	cmp	ah,0
 	jne	cs_nor	;nor at the end
 	jmp	big	;si not end but di end
 cs_jp2:	jmp	small	;si end but di not end
-cs_nor:	cmp	al,ah
+cs_nor:	cmp	al,'a'
+	jb	cs_jp3
+	cmp	al,'z'
+	ja	cs_jp3
+	sub	al,'a'-'A'
+cs_jp3:	cmp	ah,'a'
+	jb	cs_jp4
+	cmp	ah,'z'
+	ja	cs_jp4
+	sub	ah,'a'-'A'
+cs_jp4: cmp	al,ah
 	ja	big
 	cmp	al,ah
 	jb	small		
@@ -185,9 +206,13 @@ end_cs:	pop	di
 cmp_str	endp
 
 prt_nl proc
+	push	dx
+	push	ax
 	lea	dx,new_lin
 	mov	ah,9
 	int	21h
+	pop	ax
+	pop	dx
 	ret
 prt_nl 	endp
 

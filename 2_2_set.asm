@@ -5,9 +5,23 @@ stack1	ends
 
 data	segment	para
 symb	db	'='
+switch	dw	0
 new_lin	db	0dh,0ah,'$'
-str1	db	128 dup(?)
-str2	db	128 dup(?)
+info_0	db	'0 for copy str1 to str2',0dh,0ah,'$'
+info_1	db	'1 for compare str1 with str2',0dh,0ah,'$'
+info_2	db	'2 for insert str1 to str2',0dh,0ah,'$'
+info_3	db	'3 for find str1 in str2',0dh,0ah,'$'
+info_4	db	'4 for delete str1 in str2',0dh,0ah,'$'
+info_5	db	'5 for exit',0dh,0ah,'$'
+info_6	db	'str1:','$'
+info_7	db	'str2:','$'
+info_8	db	'please input str1:',0dh,0ah,'$'
+info_9	db	'please input str2:',0dh,0ah,'$'
+info_10	db	'please input a int:',0dh,0ah,'$'
+info_11	db	'please input a int for insert index:',0dh,0ah,'$'
+info_12	db	'input:','$'
+str1	db	20h dup(?)
+str2	db	20h dup(?)
 data	ends
 
 code	segment	para
@@ -21,63 +35,141 @@ main	proc	far
 	mov	ss,ax
 	mov	sp,sta_bot
 	
+	call	prt_hlp	
+ma_lp1:	
+	call	scf_int
+	mov	switch,ax
+	
+	lea	dx,info_12
+	mov	ah,9
+	int	21h
+	mov	ax,switch
+	call	prt_int
+	call	prt_nl
+	
+	mov	ax,switch
+	cmp	ax,0
+	jb	ma_lp1
+	cmp	ax,5
+	ja	ma_lp1
+	cmp	ax,5
+	jne	ma_nor
+exit:	mov	ax,4c00h
+	int	21h
+
 	;read two str
+ma_nor:	lea	dx,info_8
+	mov	ah,9
+	int	21h
 	lea	di,str1
 	call	scf_str
+	lea	dx,info_9
+	mov	ah,9
+	int	21h
 	lea	di,str2
-	call	scf_str
-	
-	;lower to upper
-	;lea	si,str1
-	;call	lo_up
-	;lea	si,str2
-	;call	lo_up
-	
-	;copy str1 to str2
-	;lea	si,str1
-	;lea	di,str2
-	;call	cpy_str
-	
-	;compare two str
-	;lea	si,str1
-	;lea	di,str2
-	;call	cmp_str
-	;mov	dl,symb
-	;mov	ah,2
-	;int	21h
-	;call	prt_nl
-	
-	;insert str1 into str2 with index bx
-	;call	scf_int
-	;mov	bx,ax
-	;lea	si,str1
-	;lea	di,str2
-	;call	insert
-	
-	;find str1 in the str2
-	;lea	si,str1
-	;lea	di,str2
-	;call	fnd_str
-	;call	prt_int	
-	;call	prt_nl		
-	
-	;del str1 in the str2
+	call	scf_str	
+
+	mov	ax,switch
+	cmp	ax,0
+	je	do_cpy
+	cmp	ax,1
+	je	do_cmp
+	cmp	ax,2
+	je	do_ins
+	cmp	ax,3
+	je	do_fnd
+	cmp	ax,4
+	je	do_del
+	jmp	ma_lp1
+
+do_cpy:	;copy str1 to str2
 	lea	si,str1
 	lea	di,str2
+	call	cpy_str
+	jmp	do_res	
+
+do_cmp:	;compare two str
+	lea	si,str1
+	lea	di,str2
+	call	cmp_str
+	mov	dl,symb
+	mov	ah,2
+	int	21h
+	call	prt_nl
+	jmp	do_res
+
+do_ins:	;insert str1 into str2 with index bx
+	lea	dx,info_11
+	mov	ah,9
+	int	21h
+	call	scf_int
+	mov	bx,ax
+	lea	si,str1
+	lea	di,str2
+	call	insert
+	jmp	do_res
+
+do_fnd:	;find str1 in the str2
+	lea	si,str1
+	lea	di,str2
+	call	fnd_str
+	call	prt_int	
+	call	prt_nl		
+	jmp	do_res	
+
+	;del str1 in the str2
+do_del:	lea	si,str1
+	lea	di,str2
 	call	delete
+	jmp	do_res	
 		
 	;print two str
+do_res:	lea	dx,info_6
+	mov	ah,9
+	int	21h
 	lea	si,str1
 	call	prt_str
 	call	prt_nl
+	lea	dx,info_7
+	mov	ah,9
+	int	21h
 	lea	si,str2
 	call	prt_str
+	call	prt_nl
+		
+	jmp	ma_lp1
 	
-	
-
-exit:	mov	ax,4c00h
-	int	21h
 main	endp
+
+;print help
+prt_hlp	proc
+	push	dx
+	push	ax
+	lea	dx,info_10	
+	mov	ah,9
+	int 21h	
+	lea	dx,info_0	
+	mov	ah,9
+	int 21h
+	lea	dx,info_1	
+	mov	ah,9
+	int 21h
+	lea	dx,info_2	
+	mov	ah,9
+	int 21h
+	lea	dx,info_3	
+	mov	ah,9
+	int 21h
+	lea	dx,info_4	
+	mov	ah,9
+	int 21h
+	lea	dx,info_5	
+	mov	ah,9
+	int 21h
+	pop	ax
+	pop	dx
+	ret
+prt_hlp	endp
 
 ;print str, addr with si
 prt_str proc
@@ -101,7 +193,8 @@ ss_lp1:	int	21h
 	mov	[di],al
 	inc	di
 	jmp	ss_lp1
-end_ss:	mov	[di],0
+end_ss:	mov	byte ptr [di],0
+	call	prt_nl
 	ret
 scf_str endp
 
@@ -157,6 +250,7 @@ si_lp1:	mov	ah,1
 	push	ax
 	jmp	si_lp1
 end_si:	pop	ax
+	call	prt_nl
 	ret
 scf_int	endp
 
@@ -173,7 +267,17 @@ cs_jp1:	cmp	ah,0
 	jne	cs_nor	;nor at the end
 	jmp	big	;si not end but di end
 cs_jp2:	jmp	small	;si end but di not end
-cs_nor:	cmp	al,ah
+cs_nor:	cmp	al,'a'
+	jb	cs_jp3
+	cmp	al,'z'
+	ja	cs_jp3
+	sub	al,'a'-'A'
+cs_jp3:	cmp	ah,'a'
+	jb	cs_jp4
+	cmp	ah,'z'
+	ja	cs_jp4
+	sub	ah,'a'-'A'
+cs_jp4:	cmp	al,ah
 	ja	big
 	cmp	al,ah
 	jb	small		
@@ -301,7 +405,7 @@ de_lp1:	push	si
 	pop	ax	;lenth of str1
 	pop	bx	;index
 	sub	cx,ax	;cx = len(str2) - len(str1) - index + 1
-	sub	cx,bx
+	sub	cx,bx 
 	inc	cx
 	push	di
 	push	si
@@ -312,15 +416,19 @@ de_lp1:	push	si
 	rep	movsb
 	pop	si
 	pop	di
-	add	di,bx	;di renew the next pointer
-	jmp	de_lp1	;del all the sub str1
+	;add	di,bx	;di renew the next pointer
+	;jmp	de_lp1	;del all the sub str1
 end_de:	ret
 delete	endp
 
 prt_nl proc
+	push	dx
+	push	ax
 	lea	dx,new_lin
 	mov	ah,9
 	int	21h
+	pop	ax
+	pop	dx
 	ret
 prt_nl 	endp
 

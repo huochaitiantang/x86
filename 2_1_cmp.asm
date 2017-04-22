@@ -5,8 +5,9 @@ stack1	ends
 
 data	segment	para
 symb	db	'='
-str1	db	128 dup(0)
-str2	db	128 dup(0)
+new_lin	db	0dh,0ah,'$'
+str1	db	20h dup(0)
+str2	db	20h dup(0)
 data	ends
 
 code	segment	para
@@ -25,10 +26,10 @@ main	proc	far
 	lea	di,str2
 	call	scf_str
 	
-	lea	si,str1
-	call	lo_up
-	lea	si,str2
-	call	lo_up
+	;lea	si,str1
+	;call	lo_up
+	;lea	si,str2
+	;call	lo_up
 	
 	lea	si,str1
 	lea	di,str2
@@ -46,6 +47,17 @@ main	proc	far
 exit:	mov	ax,4c00h
 	int	21h
 main	endp
+
+prt_nl proc
+	push	dx
+	push	ax
+	lea	dx,new_lin
+	mov	ah,9
+	int	21h
+	pop	ax
+	pop	dx
+	ret
+prt_nl 	endp
 
 ;print str, addr with si
 prt_str proc
@@ -77,10 +89,11 @@ ss_lp1:	int	21h
 	mov	[di],al
 	inc	di
 	jmp	ss_lp1
-end_ss:	mov	[di],0
+end_ss:	mov	byte ptr [di],0
 	pop	di
 	pop	dx
 	pop	ax
+	call	prt_nl
 	ret
 scf_str endp
 
@@ -142,7 +155,17 @@ cs_jp1:	cmp	ah,0
 	jne	cs_nor	;nor at the end
 	jmp	big	;si not end but di end
 cs_jp2:	jmp	small	;si end but di not end
-cs_nor:	cmp	al,ah
+cs_nor:	cmp	al,'a'
+	jb	cs_jp3
+	cmp	al,'z'
+	ja	cs_jp3
+	sub	al,'a'-'A'
+cs_jp3:	cmp	ah,'a'
+	jb	cs_jp4
+	cmp	ah,'z'
+	ja	cs_jp4
+	sub	ah,'a'-'A'
+cs_jp4:	cmp	al,ah
 	ja	big
 	cmp	al,ah
 	jb	small		
