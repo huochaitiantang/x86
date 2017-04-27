@@ -171,6 +171,7 @@ do_fnd	proc
 	push	si
 	push	di
 	call	fnd_str
+	push	ax
 	call	prt_int	
 	call	prt_nl		
 	call	do_res
@@ -289,7 +290,7 @@ len_str	proc
 	mov	bp,sp
 	push	si
 	push	bx
-	mov	si,[bp+8]
+	mov	si,[bp+4]
 	mov	bx,0
 ls_lp1:	mov	al,[si]
 	cmp	al,0
@@ -357,9 +358,9 @@ lo_up	endp
 cmp_str	proc
 	push	bp	
 	mov	bp,sp
-cs_lp1:	mov	si,[bp+6]
+	mov	si,[bp+6]
 	mov	di,[bp+4]
-	mov	al,[si]
+cs_lp1:	mov	al,[si]
 	mov	ah,[di]
 	cmp	al,0
 	jne	cs_jp1
@@ -396,13 +397,13 @@ cpy_str proc
 	mov	si,[bp+6]
 	mov	di,[bp+4]
 	push	si
-	push	si
 	call	len_str
 	mov	cx,ax
 	inc	cx
-	pop	si
 	cld		
 	rep	movsb
+	mov	sp,bp
+	pop	bp
 	ret	4
 cpy_str	endp
 
@@ -486,9 +487,9 @@ cmp_nby	proc
 	push	cx
 	push	di
 	push	si
-	mov	cx,[bp+10]
-	mov	di,[bp+12]
-	mov	si,[bp+14]
+	mov	cx,[bp+4]
+	mov	di,[bp+6]
+	mov	si,[bp+8]
 	mov	ax,1
 	cld
 cn_lp1:	cmpsb
