@@ -205,7 +205,7 @@ do_mul	proc
 	lea	si,op_1	
 	push	si
 	call	scf_d
-	lea	dx,info_15
+	lea	dx,info_14
 	mov	ah,9
 	int	21h
 	lea	si,op_2
