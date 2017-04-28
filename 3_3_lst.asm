@@ -10,6 +10,7 @@ switch	dw	4 dup(0)
 op_1	dw	4 dup(0)
 op_2	dw	4 dup(0)
 ans	dw	4 dup(0)
+modans	dw	4 dup(0)
 new_lin	db	0dh,0ah,'$'
 info_0	db	'  0 : exit',0dh,0ah,'$'
 info_1	db	'  1 : decimalism to hexadecimal [64bits]',0dh,0ah,'$'
@@ -17,7 +18,7 @@ info_2	db	'  2 : hexadecimal to decimalism [64bits]',0dh,0ah,'$'
 info_3	db	'  3 : [64bits] add [64bits]',0dh,0ah,'$'
 info_4	db	'  4 : [64bits] sub [64bits]',0dh,0ah,'$'
 info_5	db	'  5 : [32bits] mul [32bits]',0dh,0ah,'$'
-info_6	db	'  6 : [64bits] div [32bits]',0dh,0ah,'$'
+info_6	db	'  6 : [64bits] div [16bits]',0dh,0ah,'$'
 info_7	db	'Please input a number (0-6)',0dh,0ah,'$'
 info_8	db	'Please input a decimalism number (0-18446744073709551615):',0dh,0ah,'$'
 info_9	db	'Please input a hexadecimal number (0-ffffffffffffffff):',0dh,0ah,'$'
@@ -26,6 +27,7 @@ info_11	db	'Please input opt_1 (1-18446744073709551615):',0dh,0ah,'$'
 info_12	db	'Please input opt_2 (1-18446744073709551615):',0dh,0ah,'$'
 info_13	db	'Please input opt_1 (1-4294967295):',0dh,0ah,'$'
 info_14	db	'Please input opt_2 (1-4294967295):',0dh,0ah,'$'
+info_15	db	'Please input opt_2 (1-65535):',0dh,0ah,'$'
 data	ends
 
 code	segment	para
@@ -203,7 +205,7 @@ do_mul	proc
 	lea	si,op_1	
 	push	si
 	call	scf_d
-	lea	dx,info_14
+	lea	dx,info_15
 	mov	ah,9
 	int	21h
 	lea	si,op_2
@@ -232,7 +234,7 @@ do_div	proc
 	lea	si,op_1	
 	push	si
 	call	scf_d
-	lea	dx,info_14
+	lea	dx,info_15
 	mov	ah,9
 	int	21h
 	lea	si,op_2
@@ -243,6 +245,13 @@ do_div	proc
 	mov	ah,9
 	int	21h
 	lea	si,ans
+	push	si
+	call	prt_d
+	call	prt_nl
+	lea	dx,info_10
+	mov	ah,9
+	int	21h
+	lea	si,modans
 	push	si
 	call	prt_d
 	call	prt_nl
@@ -608,7 +617,29 @@ op_sub	endp
 op_mul	proc
 	push	bp
 	mov	bp,sp
-
+	lea	si,ans
+	push	si
+	call	clear
+	mov	ax,op_1+6
+	mov	bx,op_2+6
+	mul	bx
+	mov	ans+6,ax
+	mov	ans+4,dx
+	mov	ax,op_1+4
+	mul	bx
+	add	ans+4,ax
+	adc	ans+2,dx
+	adc	word ptr ans,0
+	mov	ax,op_1+6
+	mov	bx,op_2+4
+	mul	bx
+	add	ans+4,ax
+	adc	ans+2,dx
+	adc	word ptr ans,0
+	mov	ax,op_1+4
+	mul	bx
+	add	ans+2,ax
+	adc	ans,dx
 	mov	sp,bp
 	pop	bp
 	ret	
@@ -619,7 +650,26 @@ op_mul	endp
 op_div	proc
 	push	bp
 	mov	bp,sp
-
+	lea	si,ans
+	push	si
+	call	clear
+	lea	si,modans
+	push	si
+	call	clear
+	lea	si,op_1
+	push	si
+	lea	si,tmp
+	push	si
+	call	cp_num
+	mov	bx,op_2+6
+	push	bx
+	call	tp_div
+	lea	si,tmp
+	push	si
+	lea 	si,ans
+	push	si
+	call	cp_num
+	mov	modans+6,dx
 	mov	sp,bp
 	pop	bp
 	ret	

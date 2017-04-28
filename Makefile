@@ -21,6 +21,5 @@ clean:
 	rm 3_2_set.exe
 	rm 3_3_lst.exe
 	rm *.o
-	rm *.err
 
 
