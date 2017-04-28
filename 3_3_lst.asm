@@ -12,7 +12,7 @@ op_2	dw	4 dup(0)
 ans	dw	4 dup(0)
 modans	dw	4 dup(0)
 new_lin	db	0dh,0ah,'$'
-info_0	db	'  0 : Exit',0dh,0ah,'$'
+info_0	db	'  7 : Exit',0dh,0ah,'$'
 info_1	db	'  1 : Dec to Hex [64 bit]',0dh,0ah,'$'
 info_2	db	'  2 : Hex to Dec [64 bit]',0dh,0ah,'$'
 info_3	db	'  3 : [64 bit] ADD [64 bit]',0dh,0ah,'$'
@@ -44,11 +44,11 @@ ma_lp1:	call	prt_hlp
 	push	si
 	call	scf_d	
 	mov	ax,switch+6
-	cmp	ax,0
+	cmp	ax,1
 	jb	ma_lp1
-	cmp	ax,6
+	cmp	ax,7
 	ja	ma_lp1
-	cmp	ax,0
+	cmp	ax,7
 	jne	ma_nor
 exit:	mov	ax,4c00h
 	int	21h
