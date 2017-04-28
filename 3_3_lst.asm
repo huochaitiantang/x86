@@ -28,6 +28,7 @@ info_12	db	'Please input opt_2 (0-18446744073709551615):',0dh,0ah,'$'
 info_13	db	'Please input opt_1 (0-4294967295):',0dh,0ah,'$'
 info_14	db	'Please input opt_2 (0-4294967295):',0dh,0ah,'$'
 info_15	db	'Please input opt_2 (1-65535):',0dh,0ah,'$'
+fun_ind	dw	6 dup(?)
 data	ends
 
 code	segment	para
@@ -39,6 +40,18 @@ main	proc	far
 	mov	ax,stack1
 	mov	ss,ax
 	mov	sp,sta_bot
+	lea	si,do_dh
+	mov	fun_ind,si
+	lea	si,do_hd
+	mov	fun_ind+2,si
+	lea	si,do_add
+	mov	fun_ind+4,si
+	lea	si,do_sub
+	mov	fun_ind+6,si
+	lea	si,do_mul
+	mov	fun_ind+8,si
+	lea	si,do_div
+	mov	fun_ind+10,si
 ma_lp1:	call	prt_hlp	
 	lea	si,switch
 	push	si
@@ -62,29 +75,12 @@ do_swi	proc
 	push	bp
 	mov	bp,sp
 	mov	ax,switch+6
-	cmp	ax,1
-	jne	ds_pl1
-	call	do_dh
-	jmp	end_ds
-ds_pl1:	cmp	ax,2
-	jne	ds_pl2
-	call	do_hd
-	jmp	end_ds
-ds_pl2:	cmp	ax,3
-	jne	ds_pl3
-	call	do_add
-	jmp	end_ds
-ds_pl3:	cmp	ax,4
-	jne	ds_pl4
-	call	do_sub
-	jmp	end_ds
-ds_pl4:	cmp	ax,5
-	jne	ds_pl5
-	call	do_mul
-	jmp	end_ds
-ds_pl5:	cmp	ax,6
-	jne	end_ds
-	call	do_div
+	sub	ax,1
+	mov	bx,2
+	mul	bx
+	lea	si,fun_ind
+	add	si,ax
+	call	[si]
 end_ds:	mov	sp,bp
 	pop	bp
 	ret
