@@ -12,13 +12,13 @@ op_2	dw	4 dup(0)
 ans	dw	4 dup(0)
 modans	dw	4 dup(0)
 new_lin	db	0dh,0ah,'$'
-info_0	db	'  0 : exit',0dh,0ah,'$'
-info_1	db	'  1 : decimalism to hexadecimal [64bits]',0dh,0ah,'$'
-info_2	db	'  2 : hexadecimal to decimalism [64bits]',0dh,0ah,'$'
-info_3	db	'  3 : [64bits] add [64bits]',0dh,0ah,'$'
-info_4	db	'  4 : [64bits] sub [64bits]',0dh,0ah,'$'
-info_5	db	'  5 : [32bits] mul [32bits]',0dh,0ah,'$'
-info_6	db	'  6 : [64bits] div [16bits]',0dh,0ah,'$'
+info_0	db	'  0 : Exit',0dh,0ah,'$'
+info_1	db	'  1 : Dec to Hex [64 bit]',0dh,0ah,'$'
+info_2	db	'  2 : Hex to Dec [64 bit]',0dh,0ah,'$'
+info_3	db	'  3 : [64 bit] ADD [64 bit]',0dh,0ah,'$'
+info_4	db	'  4 : [64 bit] SUB [64 bit]',0dh,0ah,'$'
+info_5	db	'  5 : [32 bit] MUL [32 bit]',0dh,0ah,'$'
+info_6	db	'  6 : [64 bit] DIV [16 bit]',0dh,0ah,'$'
 info_7	db	'Please input a number (0-6)',0dh,0ah,'$'
 info_8	db	'Please input a decimalism number (0-18446744073709551615):',0dh,0ah,'$'
 info_9	db	'Please input a hexadecimal number (0-ffffffffffffffff):',0dh,0ah,'$'
@@ -353,7 +353,8 @@ sd_1:	mov	ah,1
 	push	si
 	call	cp_num		;num = tmp
 	jmp	sd_1	
-end_sd:	mov	sp,bp
+end_sd:	call	prt_nl
+	mov	sp,bp
 	pop	bp
 	ret	2
 scf_d	endp
@@ -409,7 +410,8 @@ sh_1:	mov	ah,1
 	push	si
 	call	cp_num		;num = tmp
 	jmp	sh_1	
-end_sh:	mov	sp,bp
+end_sh:	call	prt_nl
+	mov	sp,bp
 	pop	bp
 	ret	2
 scf_h	endp
@@ -683,8 +685,6 @@ prt_hlp	proc
 	lea	dx,info_7
 	mov	ah,9
 	int 	21h	
-	lea	dx,info_0	
-	int 	21h
 	lea	dx,info_1	
 	int 	21h
 	lea	dx,info_2	
@@ -695,7 +695,9 @@ prt_hlp	proc
 	int 	21h
 	lea	dx,info_5	
 	int 	21h
-	lea	dx,info_6
+	lea	dx,info_6	
+	int 	21h
+	lea	dx,info_0
 	int	21h
 	mov	sp,bp
 	pop	bp
